@@ -1,12 +1,27 @@
 import CommonForm from "@/components/common-form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { signInFormControls, signUpFormControls } from "@/config";
+import { AuthContext } from "@/context/auth-context";
 import { GraduationCap } from "lucide-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 
 function AuthPage() {
   const [activeTab, setActiveTab] = useState("signin");
+
+  const {
+    signInFormData,
+    setSignInFormData,
+    signUpFormData,
+    setSignUpFormData,
+  } = useContext(AuthContext);
 
   function handleTabChange(value) {
     setActiveTab(value);
@@ -31,10 +46,40 @@ function AuthPage() {
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
           <TabsContent value="signin">
-            <CommonForm formControls={signInFormControls} />
+            <Card className="p-6 space-y-4 ">
+              <CardHeader>
+                <CardTitle>Sign In to Your Account</CardTitle>
+                <CardDescription>
+                  Enter Your Email and Password to access your account
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 ">
+                <CommonForm
+                  formControls={signInFormControls}
+                  buttonText={"Sign In"}
+                  formData={signInFormData}
+                  setFormData={setSignInFormData}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
           <TabsContent value="signup">
-            <CommonForm formControls={signUpFormControls} />
+            <Card className="p-6 space-y-4 ">
+              <CardHeader>
+                <CardTitle>Create a New Account</CardTitle>
+                <CardDescription>
+                  Enter Your User Name, Email and Password to get started
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 ">
+                <CommonForm
+                  formControls={signUpFormControls}
+                  buttonText={"Sign Up"}
+                  formData={signUpFormData}
+                  setFormData={setSignUpFormData}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
