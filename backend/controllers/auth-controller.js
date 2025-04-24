@@ -31,3 +31,18 @@ export const registerUser = async (req, res) => {
     message: "User registed successfully",
   });
 };
+
+export const loginUser = async (req, res) => {
+  const { userEmail, password } = req.body;
+
+  const checkUser = await User.findOne({ userEmail });
+
+  if(!checkUser){
+	return res.status(400).json({
+		success: false,
+		message: 'Invalid cradintials'
+	})
+  }
+
+  
+};
