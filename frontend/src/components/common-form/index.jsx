@@ -7,7 +7,7 @@ function CommonForm({
   formControls = [],
   formData,
   setFormData,
-  isButtonDisables = false,
+  isButtonDisables,
 }) {
   return (
     <form onSubmit={handleSubmit}>

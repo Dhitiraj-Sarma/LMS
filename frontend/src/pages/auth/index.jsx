@@ -35,6 +35,15 @@ function AuthPage() {
     );
   }
 
+  function checkIfSignUpFormIsValid() {
+    return (
+      signUpFormData &&
+      signUpFormData.userEmail !== "" &&
+      signUpFormData.password !== "" &&
+      signUpFormData.userName !== ""
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center border-b">
@@ -68,7 +77,7 @@ function AuthPage() {
                   buttonText={"Sign In"}
                   formData={signInFormData}
                   setFormData={setSignInFormData}
-                  isButtonDisables={checkIfSignInFormIsValid}
+                  isButtonDisables={!checkIfSignInFormIsValid()}
                 />
               </CardContent>
             </Card>
@@ -87,7 +96,7 @@ function AuthPage() {
                   buttonText={"Sign Up"}
                   formData={signUpFormData}
                   setFormData={setSignUpFormData}
-                  isButtonDisables={checkIfSignInFormIsValid}
+                  isButtonDisables={!checkIfSignUpFormIsValid()}
                 />
               </CardContent>
             </Card>
