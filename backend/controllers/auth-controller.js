@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
-import { generateToken } from "../lib/utils.js";
+import jwt from "jsonwebtoken";
 
 export const registerUser = async (req, res) => {
   const { userName, userEmail, password, role } = req.body;
@@ -27,21 +27,32 @@ export const registerUser = async (req, res) => {
       password: hashPassword,
     });
 
-    if (newUser) {
-      generateToken(newUser._id, res);
-      await newUser.save();
+    newUser.save();
 
-      res.status(200).json({
-        success: true,
-        message: "User registed successfully",
+    const accessToken = jwt.sign(
+      {
         _id: newUser._id,
         userName: newUser.userName,
         userEmail: newUser.userEmail,
         role: newUser.role,
-      });
-    } else {
-      res.status(400).json({ message: "Invalid user data" });
-    }
+      },
+      "JWT_SECRET",
+      { expiresIn: "120m" }
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully!",
+      data: {
+        accessToken,
+        user: {
+          _id: newUser._id,
+          userName: newUser.userName,
+          userEmail: newUser.userEmail,
+          role: newUser.role,
+        },
+      },
+    });
   } catch (error) {
     console.error("Error in registerUser controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
@@ -51,40 +62,37 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   const { userEmail, password } = req.body;
 
-  try {
-    const checkUser = await User.findOne({ userEmail });
+  const checkUser = await User.findOne({ userEmail });
 
-    if (!checkUser) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
+  if (!checkUser || !(await bcrypt.compare(password, checkUser.password))) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid credentials",
+    });
+  }
 
-    const checkPassowrdCorrect = await bcrypt.compare(
-      password,
-      checkUser.password
-    );
-
-    if (!checkPassowrdCorrect) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
-
-    generateToken(checkUser._id, res);
-
-    res.status(200).json({
-      success: true,
-      message: "Logged in Successfully",
+  const accessToken = jwt.sign(
+    {
       _id: checkUser._id,
       userName: checkUser.userName,
       userEmail: checkUser.userEmail,
       role: checkUser.role,
-    });
-  } catch (error) {
-    console.error("Error in loginUser controller", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
+    },
+    "JWT_SECRET",
+    { expiresIn: "120m" }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Logged in successfully",
+    data: {
+      accessToken,
+      user: {
+        _id: checkUser._id,
+        userName: checkUser.userName,
+        userEmail: checkUser.userEmail,
+        role: checkUser.role,
+      },
+    },
+  });
 };

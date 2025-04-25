@@ -8,3 +8,9 @@ export async function registerService(formData) {
 
   return res.data;
 }
+
+export async function loginService(formData) {
+  const res = await axiosInstance.post("/auth/login", formData);
+
+  return res.data;
+}
