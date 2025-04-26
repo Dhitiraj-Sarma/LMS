@@ -1,5 +1,5 @@
 function InstructorDashboard() {
-  return <div>admin page</div>;
+  return <div>Instructor page</div>;
 }
 
 export default InstructorDashboard;
