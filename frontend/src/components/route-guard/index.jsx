@@ -10,18 +10,19 @@ export default function RouteGuard({ authenticated, user, element }) {
 
   if (
     authenticated &&
-    user?.role !== "admin" &&
-    (location.pathname.includes("admin") || location.pathname.includes("auth"))
+    user?.role !== "instructor" &&
+    (location.pathname.includes("instructor") ||
+      location.pathname.includes("auth"))
   ) {
     return <Navigate to="/home" />;
   }
 
   if (
     authenticated &&
-    user?.role === "admin" &&
-    !location.pathname.includes("admin")
+    user?.role === "instructor" &&
+    !location.pathname.includes("instructor")
   ) {
-    return <Navigate to="/admin" />;
+    return <Navigate to="/instructor" />;
   }
 
   return <Fragment>{element}</Fragment>;
