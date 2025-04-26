@@ -5,6 +5,7 @@ import { useContext } from "react";
 import { AuthContext } from "./context/auth-context";
 import InstructorDashboard from "./pages/instructor";
 import StudentHomePage from "./pages/student/home";
+import StudentViewCommonLayout from "./components/student-view/common-layout";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -15,7 +16,7 @@ function App() {
           path="/auth"
           element={
             <RouteGuard
-              authenticated={auth?.authenticated}
+              authenticated={auth?.authenticate}
               element={<AuthPage />}
               user={auth?.user}
             />
@@ -25,22 +26,25 @@ function App() {
           path="/instructor"
           element={
             <RouteGuard
-              authenticated={auth?.authenticated}
+              authenticated={auth?.authenticate}
               user={auth?.user}
               element={<InstructorDashboard />}
             />
           }
         />
         <Route
-          path="/home"
+          path="/"
           element={
             <RouteGuard
-              authenticated={auth?.authenticated}
+              authenticated={auth?.authenticate}
               user={auth?.user}
-              element={<StudentHomePage />}
+              element={<StudentViewCommonLayout />}
             />
           }
-        />
+        >
+          <Route path="" element={<StudentHomePage />} />
+          <Route path="home" element={<StudentHomePage />} />
+        </Route>
       </Routes>
     </div>
   );
