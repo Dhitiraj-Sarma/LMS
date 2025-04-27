@@ -11,8 +11,8 @@ export default function RouteGuard({ authenticated, user, element }) {
   if (
     authenticated &&
     user?.role !== "instructor" &&
-    (location.pathname.includes("instructor") ||
-      location.pathname.includes("auth"))
+    (location.pathname.includes("/instructor") ||
+      location.pathname.includes("/auth"))
   ) {
     return <Navigate to="/home" />;
   }
@@ -20,7 +20,7 @@ export default function RouteGuard({ authenticated, user, element }) {
   if (
     authenticated &&
     user?.role === "instructor" &&
-    !location.pathname.includes("instructor")
+    !location.pathname.includes("/instructor")
   ) {
     return <Navigate to="/instructor" />;
   }
