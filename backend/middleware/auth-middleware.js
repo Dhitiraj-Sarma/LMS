@@ -1,24 +1,37 @@
 import jwt from "jsonwebtoken";
 
-const verifyToken = (token, serect) => {
-  jwt.verify(token, serect);
+const verifyToken = (token, secret) => {
+  // return the decoded payload, or let it throw
+  return jwt.verify(token, secret);
 };
 
 export const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
+  // 1) Check that we have a Bearer token
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
       success: false,
-      message: "User is not authenticated",
+      message: "Authentication token missing",
     });
   }
 
   const token = authHeader.split(" ")[1];
 
-  const payload = verifyToken(token, "JWT_SECRET");
+  try {
+    // 2) Verify & decode, using your real secret
+    const payload = verifyToken(token, "JWT_SECRET");
 
-  req.user = payload;
+    // 3) Attach the decoded payload to req.user
+    req.user = payload;
 
-  next();
+    // 4) Pass control to the next middleware/handler
+    return next();
+  } catch (err) {
+    // 5) If verification failed, send a 403
+    return res.status(403).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
 };
