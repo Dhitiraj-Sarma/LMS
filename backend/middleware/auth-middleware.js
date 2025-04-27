@@ -20,7 +20,7 @@ export const authenticate = (req, res, next) => {
 
   try {
     // 2) Verify & decode, using your real secret
-    const payload = verifyToken(token, "JWT_SECRET");
+    const payload = verifyToken(token, process.env.JWT_SECRET);
 
     // 3) Attach the decoded payload to req.user
     req.user = payload;

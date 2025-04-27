@@ -36,7 +36,7 @@ export const registerUser = async (req, res) => {
         userEmail: newUser.userEmail,
         role: newUser.role,
       },
-      "JWT_SECRET",
+      process.env.JWT_SECRET,
       { expiresIn: "120m" }
     );
 
@@ -78,7 +78,7 @@ export const loginUser = async (req, res) => {
       userEmail: checkUser.userEmail,
       role: checkUser.role,
     },
-    "JWT_SECRET",
+    process.env.JWT_SECRET,
     { expiresIn: "120m" }
   );
 
