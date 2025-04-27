@@ -2,6 +2,7 @@ import { initialSignInFormData, initialSignUpFormData } from "@/config";
 import { loginService, registerService } from "@/services";
 import { createContext, useEffect, useState } from "react";
 import { checkAuthService } from "@/services";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const AuthContext = createContext(null);
 
@@ -12,6 +13,7 @@ export default function AuthProvider({ children }) {
     authenticate: false,
     user: null,
   });
+  const [loading, setLoading] = useState(true);
 
   async function handleRegisterUser(event) {
     event.preventDefault();
@@ -54,18 +56,31 @@ export default function AuthProvider({ children }) {
   }
 
   async function checkAuthUser() {
-    const data = await checkAuthService();
+    try {
+      const data = await checkAuthService();
 
-    if (data.success) {
-      setAuth({
-        authenticate: true,
-        user: data.data.user,
-      });
-    } else {
-      setAuth({
-        authenticate: false,
-        user: null,
-      });
+      if (data.success) {
+        setAuth({
+          authenticate: true,
+          user: data.data.user,
+        });
+        setLoading(false);
+      } else {
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
+        setLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+      if (!error?.response?.data?.success) {
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
+        setLoading(false);
+      }
     }
   }
 
@@ -85,7 +100,7 @@ export default function AuthProvider({ children }) {
         auth,
       }}
     >
-      {children}
+      {loading ? <Skeleton /> : children}
     </AuthContext.Provider>
   );
 }
