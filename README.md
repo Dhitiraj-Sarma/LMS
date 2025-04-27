@@ -1,9 +1,3 @@
-# <!--
-
-# ⚡ Learning Management System (LMS) — MERN Stack
-
--->
-
 <div align="center">
   <h1 style="font-size:40px; font-weight:bold;">Learning Management System</h1>
   <br/>
