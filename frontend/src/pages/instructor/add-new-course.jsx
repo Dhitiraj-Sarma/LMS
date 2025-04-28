@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function AddNewCourse() {
   return (
@@ -14,7 +14,20 @@ function AddNewCourse() {
       <Card>
         <CardContent>
           <div className="container mx-auto p-4">
-            <Tabs defaultValue="curriculum" className="space-y-4"></Tabs>
+            <Tabs defaultValue="curriculum" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
+                <TabsTrigger value="course-landing-page">
+                  Course Landing Page
+                </TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
+              </TabsList>
+              <TabsContent value="curriculum">
+				
+			  </TabsContent>
+              <TabsContent value="course-landing-page"></TabsContent>
+              <TabsContent value="settings"></TabsContent>
+            </Tabs>
           </div>
         </CardContent>
       </Card>
