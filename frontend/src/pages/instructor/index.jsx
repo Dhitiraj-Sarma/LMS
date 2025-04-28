@@ -2,11 +2,13 @@ import InstructorCourses from "@/components/instructor-view/courses";
 import InstructorDashboardComponent from "@/components/instructor-view/dashboard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { AuthContext } from "@/context/auth-context";
 import { BarChart, Book, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 function InstructorDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const { resetCredentials } = useContext(AuthContext);
   const menuItem = [
     {
       icon: BarChart,
@@ -28,7 +30,10 @@ function InstructorDashboard() {
     },
   ];
 
-  function handleLogout() {}
+  function handleLogout() {
+    resetCredentials();
+    sessionStorage.clear();
+  }
   return (
     <div className="flex h-full min-h-screen bg-gray-100">
       <aside className="w-64 bg-white shadow-md hidden md:block">
@@ -37,6 +42,7 @@ function InstructorDashboard() {
           <nav>
             {menuItem.map((menuItem) => (
               <Button
+                variant={activeTab === menuItem.value ? "secondary" : "ghost"}
                 className="w-full justify-start mb-2 cursor-pointer"
                 key={menuItem.label}
                 onClick={
