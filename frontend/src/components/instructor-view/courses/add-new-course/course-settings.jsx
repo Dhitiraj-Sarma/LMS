@@ -1,5 +1,19 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+
 function CourseSettingsPage() {
-  return <div>CourseSettingsPage</div>;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Course Settings</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-3">
+          <Label>Upload Course Image</Label>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default CourseSettingsPage;
