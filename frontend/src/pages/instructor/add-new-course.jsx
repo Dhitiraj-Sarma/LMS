@@ -22,9 +22,7 @@ function AddNewCourse() {
                 </TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
-              <TabsContent value="curriculum">
-				
-			  </TabsContent>
+              <TabsContent value="curriculum"></TabsContent>
               <TabsContent value="course-landing-page"></TabsContent>
               <TabsContent value="settings"></TabsContent>
             </Tabs>
