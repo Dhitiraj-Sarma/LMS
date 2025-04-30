@@ -10,9 +10,9 @@ export default function InstructorProvider({ children }) {
   const [courseLandingFormData, setCourseLandingFormData] = useState(
     courseLandingInitialFormData
   );
-  const [courseCurriculumFormData, setCourseCurriculumFormData] = useState(
-    courseCurriculumInitialFormData
-  );
+  const [courseCurriculumFormData, setCourseCurriculumFormData] = useState([
+    courseCurriculumInitialFormData,
+  ]);
   return (
     <InstructorContext.Provider
       value={{

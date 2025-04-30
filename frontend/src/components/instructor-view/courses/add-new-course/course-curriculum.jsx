@@ -19,6 +19,28 @@ function CourseCurriculumPage() {
     ]);
   }
 
+  function handleCourseTitleChange(e, index) {
+    let copy = [...courseCurriculumFormData];
+
+    copy[index] = {
+      ...copy[index],
+      title: e.target.value,
+    };
+
+    setCourseCurriculumFormData(copy);
+  }
+
+  function handleFreePreviewChnage(currentValue, currentIndex) {
+    let copy = [...courseCurriculumFormData];
+
+    copy[currentIndex] = {
+      ...copy[currentIndex],
+      freePreview: currentValue,
+    };
+
+    setCourseCurriculumFormData(copy);
+  }
+
   console.log(courseCurriculumFormData);
   return (
     <Card>
@@ -36,9 +58,17 @@ function CourseCurriculumPage() {
                   name={`title-${index + 1}`}
                   placeholder="Enter lecture title"
                   className="max-w-96"
+                  onChange={(e) => handleCourseTitleChange(e, index)}
+                  value={curriculum.title}
                 />
                 <div className="flex items-center space-x-2">
-                  <Switch checked={false} id={`freePreview-${index + 1}`} />
+                  <Switch
+                    onCheckedChange={(value) =>
+                      handleFreePreviewChnage(value, index)
+                    }
+                    checked={curriculum.freePreview}
+                    id={`freePreview-${index + 1}`}
+                  />
                   <Label htmlFor={`freePreview-${index + 1}`}>
                     {" "}
                     Free Preview{" "}
