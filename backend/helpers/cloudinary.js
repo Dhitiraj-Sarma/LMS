@@ -18,3 +18,4 @@ const uploadMediaToCloudinary = async (filePath) => {
   }
 };
 
+const deleteMediaFromCloudinary = async (publicId) => {}
