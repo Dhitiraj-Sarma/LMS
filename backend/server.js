@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth-routes.js";
-
+import mediaRoutes from "./routes/instructor-routes/media-router.js";
 
 dotenv.config();
 
@@ -22,6 +22,7 @@ app.use(
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/media", mediaRoutes);
 
 app.listen(PORT, () => {
   console.log("Server is Connected on PORT " + PORT);
