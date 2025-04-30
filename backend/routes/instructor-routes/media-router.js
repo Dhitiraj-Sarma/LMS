@@ -5,7 +5,7 @@ import {
   deleteMediaFromCloudinary,
 } from "../../helpers/cloudinary.js";
 
-export const router = express.Router();
+const router = express.Router();
 
 const upload = multer({ dest: "uploads/" });
 
@@ -50,3 +50,5 @@ router.delete("/delete/:id", async (req, res) => {
     });
   }
 });
+
+export default router;
