@@ -47,7 +47,6 @@ function CourseCurriculumPage() {
   }
 
   async function handleSingleLectureUpload(event, currentIndex) {
-    console.log(event.target.files[0]);
     const selectedFile = event.target.files[0];
 
     if (selectedFile) {
@@ -57,7 +56,16 @@ function CourseCurriculumPage() {
       try {
         setMediaUploadProgress(true);
         const res = await mediaUploadService(videoFormData);
-        console.log(res);
+        if (res.success) {
+          let copy = [...courseCurriculumFormData];
+          copy[currentIndex] = {
+            ...copy,
+            videoUrl: res?.data?.url,
+            public_id: res?.data?.public_id,
+          };
+          setCourseCurriculumFormData(copy);
+          setMediaUploadProgress(false);
+        }
       } catch (error) {
         console.log(error);
       }
