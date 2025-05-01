@@ -1,13 +1,13 @@
-import { v2 } from "cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 
-v2.config({
+cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 const uploadMediaToCloudinary = async (filePath) => {
   try {
-    const result = await v2.uploader.upload(filePath, {
+    const result = await cloudinary.uploader.upload(filePath, {
       resource_type: "auto",
     });
 
@@ -20,7 +20,7 @@ const uploadMediaToCloudinary = async (filePath) => {
 
 const deleteMediaFromCloudinary = async (publicId) => {
   try {
-    const result = await v2.uploader.destroy(publicId, {
+    const result = await cloudinary.uploader.destroy(publicId, {
       resource_type: "auto",
     });
     return result;
