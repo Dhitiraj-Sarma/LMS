@@ -19,3 +19,8 @@ export async function checkAuthService() {
   const res = await axiosInstance.get("/auth/check-auth");
   return res.data;
 }
+
+export async function mediaUploadService(formData) {
+  const res = await axiosInstance.post("/media/upload", formData);
+  return res.data;
+}

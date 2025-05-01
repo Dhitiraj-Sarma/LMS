@@ -4,11 +4,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { InstructorContext } from "@/context/instructor-context";
+import { mediaUploadService } from "@/services";
 import { useContext } from "react";
 
 function CourseCurriculumPage() {
-  const { courseCurriculumFormData, setCourseCurriculumFormData } =
-    useContext(InstructorContext);
+  const {
+    courseCurriculumFormData,
+    setCourseCurriculumFormData,
+    mediaUploadProgress,
+    setMediaUploadProgress,
+  } = useContext(InstructorContext);
 
   function handleNewLecture() {
     setCourseCurriculumFormData([
@@ -41,6 +46,24 @@ function CourseCurriculumPage() {
     setCourseCurriculumFormData(copy);
   }
 
+  async function handleSingleLectureUpload(event, currentIndex) {
+    console.log(event.target.files[0]);
+    const selectedFile = event.target.files[0];
+
+    if (selectedFile) {
+      const videoFormData = new FormData();
+      videoFormData.append("file", selectedFile);
+
+      try {
+        setMediaUploadProgress(true);
+        const res = await mediaUploadService(videoFormData);
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
+
   console.log(courseCurriculumFormData);
   return (
     <Card>
@@ -70,13 +93,17 @@ function CourseCurriculumPage() {
                     id={`freePreview-${index + 1}`}
                   />
                   <Label htmlFor={`freePreview-${index + 1}`}>
-                    {" "}
-                    Free Preview{" "}
+                    Free Preview
                   </Label>
                 </div>
               </div>
               <div className="mt-6">
-                <Input type="file" accept="video/*" className="mb-4" />
+                <Input
+                  type="file"
+                  accept="video/*"
+                  onChange={(event) => handleSingleLectureUpload(event, index)}
+                  className="mb-4"
+                />
               </div>
             </div>
           ))}
