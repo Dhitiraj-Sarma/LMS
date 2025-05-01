@@ -71,8 +71,6 @@ function CourseCurriculumPage() {
       }
     }
   }
-
-  console.log(courseCurriculumFormData);
   return (
     <Card>
       <CardHeader>
