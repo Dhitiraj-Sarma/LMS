@@ -121,7 +121,11 @@ function CourseCurriculumPage() {
               <div className="mt-6">
                 {curriculum?.videoUrl ? (
                   <div className="flex gap-3">
-                    <VideoPlayer url={curriculum?.videoUrl} />
+                    <VideoPlayer
+                      url={curriculum?.videoUrl}
+                      width="450px"
+                      height="200px"
+                    />
                     <Button>Replace Video</Button>
                     <Button className="bg-red-900">Delete Lecture</Button>
                   </div>
