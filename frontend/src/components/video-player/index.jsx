@@ -1,8 +1,10 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 import { Slider } from "../ui/slider";
 import { Button } from "../ui/button";
 import {
+  Maximize,
+  Minimize,
   Pause,
   Play,
   RotateCcw,
@@ -60,6 +62,53 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
     setVolume(value[0]);
   }
 
+  function pad(string) {
+    return ("0" + string).slice(-2);
+  }
+
+  function formateTime(seconds) {
+    const date = new Date(seconds * 1000);
+    const hh = date.getUTCHours();
+    const mm = date.getUTCMinutes();
+    const ss = date.getUTCSeconds();
+
+    if (hh) {
+      return `${hh}:${pad(mm)}:${ss}`;
+    } else {
+      return `${mm}:${ss}`;
+    }
+  }
+
+  const handleFullScreen = useCallback(() => {
+    if (!isFullScreen) {
+      if (playerContainerRef?.current?.requestFullscreen) {
+        playerContainerRef?.current?.requestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  }, [isFullScreen]);
+
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+    };
+  }, []);
+
+  function handleMouseMove() {
+    setShowControls(true);
+    clearTimeout(controlsTimeoutRef?.current);
+    controlsTimeoutRef.current = setTimeout(() => setShowControls(false), 3000);
+  }
+
   return (
     <div
       ref={playerContainerRef}
@@ -67,6 +116,8 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
         isFullScreen ? "w-screen h-screen" : ""
       }`}
       style={{ width, height }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setShowControls(false)}
     >
       <ReactPlayer
         ref={playerRef}
@@ -99,7 +150,7 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
                 variant="ghost"
                 size="icon"
                 onClick={handlePlayAndPause}
-                className="text-white hover:text-primary hover:bg-gray-700"
+                className="text-white bg-transparent hover:text-white hover:bg-gray-700"
               >
                 {playing ? (
                   <Pause className="h-6 w-6" />
@@ -111,7 +162,7 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
                 variant="ghost"
                 size="icon"
                 onClick={handleRewind}
-                className="text-white hover:text-primary hover:bg-gray-700"
+                className="text-white bg-transparent hover:text-white hover:bg-gray-700"
               >
                 <RotateCcw className="h-6 w-6" />
               </Button>
@@ -119,7 +170,7 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
                 variant="ghost"
                 size="icon"
                 onClick={handleForward}
-                className="text-white hover:text-primary hover:bg-gray-700"
+                className="text-white bg-transparent hover:text-white hover:bg-gray-700"
               >
                 <RotateCw className="h-6 w-6" />
               </Button>
@@ -127,7 +178,7 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
                 variant="ghost"
                 size="icon"
                 onClick={handleToggleMute}
-                className="text-white hover:text-primary hover:bg-gray-700"
+                className="text-white bg-transparent hover:text-white hover:bg-gray-700"
               >
                 {muted ? (
                   <VolumeX className="h-6 w-6" />
@@ -140,7 +191,26 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
                 max={100}
                 step={1}
                 onValueChange={(value) => handleVolumeChange([value[0] / 100])}
+                className="w-24"
               />
+            </div>
+            <div className="flex items-center space-x-2 ">
+              <div className="text-white">
+                {formateTime(played * playerRef?.current?.getDuration() || 0)} /{" "}
+                {formateTime(playerRef?.current?.getDuration() || 0)}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleFullScreen}
+                className="text-white bg-transparent hover:text-white hover:bg-gray-700"
+              >
+                {isFullScreen ? (
+                  <Minimize className="h-6 w-6" />
+                ) : (
+                  <Maximize className="h-6 w-6" />
+                )}
+              </Button>
             </div>
           </div>
         </div>
