@@ -28,17 +28,37 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
     setPlaying(!playing);
   }
 
-  function handleProgress() {}
+  function handleProgress(state) {
+    if (!seeking) {
+      setPlayed(state.played);
+    }
+  }
 
-  function handleRewind() {}
+  function handleRewind() {
+    playerRef?.current?.seekTo(playerRef?.current?.getCurrentTime() - 10);
+  }
 
-  function handleForward() {}
+  function handleForward() {
+    playerRef?.current?.seekTo(playerRef?.current?.getCurrentTime() + 10);
+  }
 
-  function handleToggleMute() {}
+  function handleToggleMute() {
+    setMuted(!muted);
+  }
 
-  function handleSeekMouseUp() {}
+  function handleSeekMouseUp() {
+    setSeeking(false);
+    playerRef?.current?.seekTo(played);
+  }
 
-  function handleSeekChange(value) {}
+  function handleSeekChange(value) {
+    setPlayed(value[0]);
+    setSeeking(true);
+  }
+
+  function handleVolumeChange(value) {
+    setVolume(value[0]);
+  }
 
   return (
     <div
@@ -58,6 +78,7 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
         volume={volume}
         muted={muted}
         onProgress={handleProgress}
+        controls
       />
       {showControls && (
         <div
@@ -115,6 +136,12 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
                   <Volume2 className="h-6 w-6" />
                 )}
               </Button>
+              <Slider
+                value={[volume * 100]}
+                max={100}
+                step={1}
+                onValueChange={(value) => handleVolumeChange([value[0] / 100])}
+              />
             </div>
           </div>
         </div>
