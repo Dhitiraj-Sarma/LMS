@@ -70,7 +70,7 @@ function VideoPlayer({ width = "100%", height = "100%", url }) {
     const date = new Date(seconds * 1000);
     const hh = date.getUTCHours();
     const mm = date.getUTCMinutes();
-    const ss = date.getUTCSeconds();
+    const ss = pad(date.getUTCSeconds());
 
     if (hh) {
       return `${hh}:${pad(mm)}:${ss}`;
