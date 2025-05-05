@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import VideoPlayer from "@/components/video-player";
 import { InstructorContext } from "@/context/instructor-context";
-import { mediaUploadService } from "@/services";
+import { mediaDeleteService, mediaUploadService } from "@/services";
 import { useContext } from "react";
 
 function CourseCurriculumPage() {
@@ -23,7 +23,10 @@ function CourseCurriculumPage() {
     setCourseCurriculumFormData([
       ...courseCurriculumFormData,
       {
-        ...courseCurriculumFormData[0],
+        title: "",
+        freePreview: false,
+        videoUrl: "",
+        public_id: "",
       },
     ]);
   }
@@ -78,13 +81,43 @@ function CourseCurriculumPage() {
       }
     }
   }
+
+  function isCourseCurriculumFormDataValid() {
+    return (
+      courseCurriculumFormData.length > 0 &&
+      courseCurriculumFormData.every((item) => {
+        return (
+          item &&
+          typeof item === "object" &&
+          item.title?.trim() !== "" &&
+          item.videoUrl?.trim() !== ""
+        );
+      })
+    );
+  }
+
+  async function handleReplaceVideo(currentIndex) {
+    let copy = [...courseCurriculumFormData];
+    const getCUrrentVideoPublicId = copy[currentIndex].public_id;
+    const deleteCurrentMediaResponde = await mediaDeleteService(
+      getCUrrentVideoPublicId
+    );
+
+    console.log(deleteCurrentMediaResponde);
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Create Course Curriculum</CardTitle>
       </CardHeader>
       <CardContent>
-        <Button onClick={handleNewLecture}>Add Lecture</Button>
+        <Button
+          disabled={!isCourseCurriculumFormDataValid() || mediaUploadProgress}
+          onClick={handleNewLecture}
+        >
+          Add Lecture
+        </Button>
         <div className="p-4">
           {mediaUploadProgress ? (
             <MediaProgressBar
@@ -126,7 +159,9 @@ function CourseCurriculumPage() {
                       width="450px"
                       height="200px"
                     />
-                    <Button>Replace Video</Button>
+                    <Button onClick={() => handleReplaceVideo(index)}>
+                      Replace Video
+                    </Button>
                     <Button className="bg-red-900">Delete Lecture</Button>
                   </div>
                 ) : (
