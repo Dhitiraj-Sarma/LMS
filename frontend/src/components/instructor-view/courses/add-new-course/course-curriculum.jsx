@@ -103,7 +103,14 @@ function CourseCurriculumPage() {
       getCUrrentVideoPublicId
     );
 
-    console.log(deleteCurrentMediaResponde);
+    if (deleteCurrentMediaResponde?.success) {
+      copy[currentIndex] = {
+        ...copy[currentIndex],
+        videoUrl: "",
+        public_id: "",
+      };
+      setCourseCurriculumFormData(copy);
+    }
   }
 
   return (
