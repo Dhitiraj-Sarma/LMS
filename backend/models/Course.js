@@ -29,8 +29,8 @@ const CourseSchema = new mongoose.Schema({
     },
   ],
   curriculum: [lectureSchema],
+  isPublised: Boolean,
 });
-
 
 const Course = mongoose.model("Course", CourseSchema);
 
