@@ -24,11 +24,12 @@ export const addNewCourse = async (req, res) => {
 
 export const getAllCourses = async (req, res) => {
   try {
-	const courseList = await Course.find({})
+    const courseList = await Course.find({});
 
-	res.status(200).json({
-		success: true
-	})
+    res.status(200).json({
+      success: true,
+      data: courseList,
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({
@@ -38,8 +39,20 @@ export const getAllCourses = async (req, res) => {
   }
 };
 
-export const getCourseDetails = async (req, res) => {
+export const getCourseDetailsById = async (req, res) => {
   try {
+    const { id } = req.params;
+    const CourseDetails = await Course.findById(id);
+    if (!CourseDetails) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      data: CourseDetails,
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({
