@@ -37,10 +37,27 @@ export async function mediaDeleteService(id) {
   return res.data;
 }
 
-export async function fetchInstructorCourseListService() {}
+export async function fetchInstructorCourseListService() {
+  const res = await axiosInstance.get("/instructor/course/get");
+  return res.data;
+}
 
-export async function addNewCourseService() {}
+export async function addNewCourseService(formData) {
+  const res = await axiosInstance.post("/instructor/course/add", formData);
 
-export async function fetchInstructorCourseDetailsService() {}
+  return res.data;
+}
 
-export async function updateCourseByIdService() {}
+export async function fetchInstructorCourseDetailsService(id) {
+  const res = await axiosInstance.get(`/instructor/course//get/details/${id}`);
+  return res.data;
+}
+
+export async function updateCourseByIdService(id, formData) {
+  const res = await axiosInstance.put(
+    `/instructor/course//update/${id}`,
+    formData
+  );
+
+  return res.data;
+}
