@@ -84,7 +84,6 @@ function CourseCurriculumPage() {
 
   function isCourseCurriculumFormDataValid() {
     return (
-      courseCurriculumFormData.length > 0 &&
       courseCurriculumFormData.every((item) => {
         return (
           item &&

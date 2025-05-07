@@ -36,3 +36,11 @@ export async function mediaDeleteService(id) {
   const res = await axiosInstance.delete(`/media/delete/${id}`);
   return res.data;
 }
+
+export async function fetchInstructorCourseListService() {}
+
+export async function addNewCourseService() {}
+
+export async function fetchInstructorCourseDetailsService() {}
+
+export async function updateCourseByIdService() {}
