@@ -12,6 +12,7 @@ import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
 import { addNewCourseService } from "@/services";
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 
 function AddNewCourse() {
   const {
@@ -22,6 +23,7 @@ function AddNewCourse() {
   } = useContext(InstructorContext);
 
   const { auth } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   function isEmpty(value) {
     if (Array.isArray(value)) {
@@ -71,6 +73,7 @@ function AddNewCourse() {
     if (res?.success) {
       setCourseLandingFormData(courseLandingInitialFormData);
       setCourseCurriculumFormData(courseCurriculumInitialFormData);
+      navigate(-1);
     }
   }
   return (
