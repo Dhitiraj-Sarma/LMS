@@ -35,3 +35,13 @@ export const authenticate = (req, res, next) => {
     });
   }
 };
+
+export const checkInstructorRole = (req, res, next) => {
+  if (req.user.role !== "instructor") {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied. Instructor privileges required",
+    });
+  }
+  next();
+};

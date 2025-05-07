@@ -36,27 +36,31 @@ function InstructorCourses({ listOfCourses }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {listOfCourses && listOfCourses.length > 0
-                ? listOfCourses.map((course) => (
-                    <TableRow key={course.date}>
-                      <TableCell className="font-medium">
-                        {course?.title}
-                      </TableCell>
-                      <TableCell>{course?.students?.length}</TableCell>
-                      <TableCell>
-                        ${course?.pricing * course?.students?.length}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-6 w-6" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Trash className="h-6 w-6 text-red-700" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                : null}
+              {listOfCourses && listOfCourses.length > 0 ? (
+                listOfCourses.map((course) => (
+                  <TableRow key={course.date}>
+                    <TableCell className="font-medium">
+                      {course?.title}
+                    </TableCell>
+                    <TableCell>{course?.students?.length}</TableCell>
+                    <TableCell>
+                      ${course?.pricing * course?.students?.length}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-6 w-6" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Trash className="h-6 w-6 text-red-700" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell>No Course Found</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>

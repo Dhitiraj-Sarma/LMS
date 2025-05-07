@@ -2,7 +2,11 @@ import Course from "../models/Course.js";
 
 export const addNewCourse = async (req, res) => {
   try {
-    const courseData = req.body;
+    const courseData = {
+      ...req.body,
+      instructorId: req.user._id,
+      instructorName: req.user.userName,
+    };
     const newlyCreatedCourse = new Course(courseData);
 
     const saveCourse = await newlyCreatedCourse.save();
@@ -24,7 +28,7 @@ export const addNewCourse = async (req, res) => {
 
 export const getAllCourses = async (req, res) => {
   try {
-    const courseList = await Course.find({});
+    const courseList = await Course.find({ instructorId: req.user._id });
 
     res.status(200).json({
       success: true,
@@ -42,52 +46,78 @@ export const getAllCourses = async (req, res) => {
 export const getCourseDetailsById = async (req, res) => {
   try {
     const { id } = req.params;
-    const CourseDetails = await Course.findById(id);
-    if (!CourseDetails) {
+
+    const courseDetails = await Course.findOne({
+      _id: id,
+      instructorId: req.user._id,
+    });
+
+    if (!courseDetails) {
       return res.status(404).json({
         success: false,
-        message: "Course not found",
+        message: "Course not found or unauthorized access",
       });
     }
-    return res.status(200).json({
+
+    res.status(200).json({
       success: true,
-      data: CourseDetails,
+      data: courseDetails,
     });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({
+    console.error("Course Details Error:", error);
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID format",
+      });
+    }
+    res.status(500).json({
       success: false,
-      message: "Some Error in get course details Controller",
+      message: "Error fetching course details",
     });
   }
 };
 
 export const updateCourseByID = async (req, res) => {
   try {
-	const { id } = req.params;
-	const courseData = req.body;
+    const { id } = req.params;
+    const courseData = req.body;
 
-	const updatedCourse = await Course.findByIdAndUpdate(id, courseData, {
-	  new: true,
-	});
+    delete courseData.instructorId;
+    delete courseData.instructorName;
 
-	if (!updatedCourse) {
-	  return res.status(404).json({
-		success: false,
-		message: "Course not found",
-	  });
-	}
+    const updatedCourse = await Course.findByIdAndUpdate(
+      { _id: id, instructorId: req.user._id },
+      courseData,
+      {
+        new: true,
+      }
+    );
 
-	return res.status(200).json({
-	  success: true,
-	  message: "Course updated successfully",
-	  data: updatedCourse,
-	});
+    if (!updatedCourse) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Course updated successfully",
+      data: updatedCourse,
+    });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({
+    console.error("Update Course Error:", error);
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID format",
+      });
+    }
+    res.status(500).json({
       success: false,
-      message: "Some Error in update course Controller",
+      message: "Error updating course",
+      error: error.message,
     });
   }
 };

@@ -5,8 +5,15 @@ import {
   getCourseDetailsById,
   updateCourseByID,
 } from "../../controllers/instructor-controller.js";
+import {
+  authenticate,
+  checkInstructorRole,
+} from "../../middleware/auth-middleware.js";
 
 const router = express.Router();
+
+router.use(authenticate);
+router.use(checkInstructorRole);
 
 router.post("/add", addNewCourse);
 router.get("/get", getAllCourses);
