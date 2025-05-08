@@ -23,11 +23,11 @@ function AddNewCourse() {
     courseCurriculumFormData,
     setCourseLandingFormData,
     setCourseCurriculumFormData,
+    currentEditedCourseId,
+    setCurrentEditedCourseId,
   } = useContext(InstructorContext);
 
   const { auth } = useContext(AuthContext);
-  const { currentEditedCourseId, setCurrentEditedCourseId } =
-    useContext(InstructorContext);
   const navigate = useNavigate();
   const params = useParams();
 
@@ -89,14 +89,17 @@ function AddNewCourse() {
     const res = await fetchInstructorCourseDetailsService(
       currentEditedCourseId
     );
+    if (res?.success) {
+      const setCourseFormData = Object.keys(
+        courseLandingInitialFormData
+      ).reduce((acc, key) => {
+        acc[key] = res?.data[key] || courseLandingInitialFormData[key];
 
-    if(res?.success){
-		const setCourseFormData = Object.keys(courseLandingInitialFormData).reduce((acc, key)=> {
-			acc[key] = res?.data[key] || courseLandingInitialFormData[key]
-
-			return acc
-		})
-	}
+        return acc;
+      }, {});
+      setCourseLandingFormData(setCourseFormData);
+      setCourseCurriculumFormData(res?.data?.curriculum);
+    }
   }
 
   useEffect(() => {
@@ -109,7 +112,7 @@ function AddNewCourse() {
     if (params) {
       setCurrentEditedCourseId(params?.courseId);
     }
-  }, [params]);
+  }, [params?.courseId]);
 
   return (
     <div className="container mx-auto p-4">
