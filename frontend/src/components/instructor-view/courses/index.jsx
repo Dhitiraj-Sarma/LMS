@@ -47,7 +47,13 @@ function InstructorCourses({ listOfCourses }) {
                       ${course?.pricing * course?.students?.length}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        onClick={() => {
+                          navigate(`/instructor/edit-course/${course?._id}`);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                      >
                         <Edit className="h-6 w-6" />
                       </Button>
                       <Button variant="ghost" size="sm">
