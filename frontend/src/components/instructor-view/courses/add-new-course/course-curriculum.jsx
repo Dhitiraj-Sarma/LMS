@@ -6,8 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import VideoPlayer from "@/components/video-player";
 import { InstructorContext } from "@/context/instructor-context";
-import { mediaDeleteService, mediaUploadService } from "@/services";
-import { useContext } from "react";
+import {
+  bulkMediaUploadService,
+  mediaDeleteService,
+  mediaUploadService,
+} from "@/services";
+import { Upload } from "lucide-react";
+import { useContext, useRef } from "react";
 
 function CourseCurriculumPage() {
   const {
@@ -18,6 +23,8 @@ function CourseCurriculumPage() {
     mediaUploadProgressPercentage,
     setMediaUploadProgressPercentage,
   } = useContext(InstructorContext);
+
+  const bulkUploadInputRef = useRef(null);
 
   function handleNewLecture() {
     setCourseCurriculumFormData([
@@ -83,16 +90,14 @@ function CourseCurriculumPage() {
   }
 
   function isCourseCurriculumFormDataValid() {
-    return (
-      courseCurriculumFormData.every((item) => {
-        return (
-          item &&
-          typeof item === "object" &&
-          item.title?.trim() !== "" &&
-          item.videoUrl?.trim() !== ""
-        );
-      })
-    );
+    return courseCurriculumFormData.every((item) => {
+      return (
+        item &&
+        typeof item === "object" &&
+        item.title?.trim() !== "" &&
+        item.videoUrl?.trim() !== ""
+      );
+    });
   }
 
   async function handleReplaceVideo(currentIndex) {
@@ -112,10 +117,95 @@ function CourseCurriculumPage() {
     }
   }
 
+  function handleOpenBulkUpload() {
+    bulkUploadInputRef.current?.click();
+  }
+
+  function areAllCourseCurriculumFormDataObjectsEmpty(arr) {
+    return arr.every((obj) =>
+      Object.values(obj).every(
+        (value) =>
+          typeof value === "boolean" ||
+          value === "" ||
+          value === null ||
+          value === undefined
+      )
+    );
+  }
+
+  async function handleMediaBulkUpload(event) {
+    const selectedFiles = Array.from(event.target.files || []);
+    if (selectedFiles.length === 0) return;
+
+    const bulkFormData = new FormData();
+    selectedFiles.forEach((file) => bulkFormData.append("files", file));
+
+    try {
+      setMediaUploadProgress(true);
+      setMediaUploadProgressPercentage(0);
+
+      const res = await bulkMediaUploadService(
+        bulkFormData,
+        setMediaUploadProgressPercentage
+      );
+
+      if (res?.success) {
+        // Calculate starting index before clearing empty items
+        const baseIndex = courseCurriculumFormData.filter(
+          (item) => !areAllCourseCurriculumFormDataObjectsEmpty([item])
+        ).length;
+
+        const currentItems = areAllCourseCurriculumFormDataObjectsEmpty(
+          courseCurriculumFormData
+        )
+          ? []
+          : courseCurriculumFormData.filter(
+              (item) => !areAllCourseCurriculumFormDataObjectsEmpty([item])
+            );
+
+        const newItems =
+          res.data?.map((item, index) => ({
+            videoUrl: item.url,
+            public_id: item.public_id,
+            title: `Lecture ${baseIndex + index + 1}`,
+            freePreview: false,
+          })) || [];
+
+        setCourseCurriculumFormData([...currentItems, ...newItems]);
+      }
+    } catch (error) {
+      console.error("Bulk upload failed:", error);
+    } finally {
+      setMediaUploadProgress(false);
+      setMediaUploadProgressPercentage(0);
+      event.target.value = "";
+    }
+  }
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row justify-between">
         <CardTitle>Create Course Curriculum</CardTitle>
+        <div>
+          <Input
+            type="file"
+            ref={bulkUploadInputRef}
+            accept="video/*"
+            multiple
+            className="hidden"
+            id="bulk-media-upload"
+            onChange={handleMediaBulkUpload}
+          />
+          <Button
+            as="label"
+            htmlFor="bulk-media-upload"
+            variant="outline"
+            className="cursor-pointer"
+            onClick={handleOpenBulkUpload}
+          >
+            <Upload className="w-4 h-5 mr-2" />
+            Bulk Upload
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <Button
