@@ -10,20 +10,28 @@ import {
 } from "@/config";
 import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
-import { addNewCourseService } from "@/services";
-import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  addNewCourseService,
+  fetchInstructorCourseDetailsService,
+} from "@/services";
+import { useContext, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-function AddNewCourse() {
+function EditCourse() {
   const {
     courseLandingFormData,
     courseCurriculumFormData,
     setCourseLandingFormData,
     setCourseCurriculumFormData,
+    currentEditedCourseId,
+    setCurrentEditedCourseId,
   } = useContext(InstructorContext);
 
   const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
+  const params = useParams();
+
+  console.log(params);
 
   function isEmpty(value) {
     if (Array.isArray(value)) {
@@ -77,6 +85,35 @@ function AddNewCourse() {
     }
   }
 
+  async function fetchCurrentCourseDetails() {
+    const res = await fetchInstructorCourseDetailsService(
+      currentEditedCourseId
+    );
+    if (res?.success) {
+      const setCourseFormData = Object.keys(
+        courseLandingInitialFormData
+      ).reduce((acc, key) => {
+        acc[key] = res?.data[key] || courseLandingInitialFormData[key];
+
+        return acc;
+      }, {});
+      setCourseLandingFormData(setCourseFormData);
+      setCourseCurriculumFormData(res?.data?.curriculum);
+    }
+  }
+
+  useEffect(() => {
+    if (currentEditedCourseId !== null) {
+      fetchCurrentCourseDetails();
+    }
+  }, [currentEditedCourseId]);
+
+  useEffect(() => {
+    if (params) {
+      setCurrentEditedCourseId(params?.courseId);
+    }
+  }, [params?.courseId]);
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between">
@@ -117,4 +154,4 @@ function AddNewCourse() {
   );
 }
 
-export default AddNewCourse;
+export default EditCourse;

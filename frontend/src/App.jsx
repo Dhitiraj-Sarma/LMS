@@ -8,6 +8,7 @@ import StudentHomePage from "./pages/student/home";
 import StudentViewCommonLayout from "./components/student-view/common-layout";
 import NotFound from "./pages/not-found";
 import AddNewCourse from "./pages/instructor/add-new-course";
+import EditCourse from "./pages/instructor/edit-course";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -44,13 +45,13 @@ function App() {
             />
           }
         />
-		 <Route
+        <Route
           path="/instructor/edit-course/:courseId"
           element={
             <RouteGuard
               authenticated={auth?.authenticate}
               user={auth?.user}
-              element={<AddNewCourse />}
+              element={<EditCourse />}
             />
           }
         />
