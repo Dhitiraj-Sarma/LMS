@@ -11,8 +11,8 @@ import {
 import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
 import {
-  addNewCourseService,
   fetchInstructorCourseDetailsService,
+  updateCourseByIdService,
 } from "@/services";
 import { useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -30,8 +30,6 @@ function EditCourse() {
   const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
   const params = useParams();
-
-  console.log(params);
 
   function isEmpty(value) {
     if (Array.isArray(value)) {
@@ -76,12 +74,18 @@ function EditCourse() {
       isPublised: true,
     };
 
-    const res = await addNewCourseService(courseFinalFormData);
+    const res =
+      currentEditedCourseId !== null &&
+      (await updateCourseByIdService(
+        currentEditedCourseId,
+        courseFinalFormData
+      ));
 
     if (res?.success) {
       setCourseLandingFormData(courseLandingInitialFormData);
       setCourseCurriculumFormData(courseCurriculumInitialFormData);
       navigate(-1);
+      setCurrentEditedCourseId(null);
     }
   }
 
