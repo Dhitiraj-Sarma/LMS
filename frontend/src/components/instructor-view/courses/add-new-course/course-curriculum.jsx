@@ -125,7 +125,7 @@ function CourseCurriculumPage() {
     return arr.every((obj) =>
       Object.values(obj).every(
         (value) =>
-          typeof value === "boolean" ||
+          (typeof value === "boolean" && !value) || // Consider boolean values as non-empty
           value === "" ||
           value === null ||
           value === undefined
@@ -150,18 +150,11 @@ function CourseCurriculumPage() {
       );
 
       if (res?.success) {
-        // Calculate starting index before clearing empty items
-        const baseIndex = courseCurriculumFormData.filter(
+        const currentItems = courseCurriculumFormData.filter(
           (item) => !areAllCourseCurriculumFormDataObjectsEmpty([item])
-        ).length;
+        );
 
-        const currentItems = areAllCourseCurriculumFormDataObjectsEmpty(
-          courseCurriculumFormData
-        )
-          ? []
-          : courseCurriculumFormData.filter(
-              (item) => !areAllCourseCurriculumFormDataObjectsEmpty([item])
-            );
+        const baseIndex = currentItems.length;
 
         const newItems =
           res.data?.map((item, index) => ({
