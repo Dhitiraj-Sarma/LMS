@@ -1,12 +1,13 @@
-import { Outlet } from "react-router-dom"
+import { Outlet } from "react-router-dom";
+import StudentHeader from "./header";
 
 function StudentViewCommonLayout() {
-	return (
-		<div>
-			common content
-			<Outlet />
-		</div>
-	)
+  return (
+    <div>
+      <StudentHeader />
+      <Outlet />
+    </div>
+  );
 }
 
-export default StudentViewCommonLayout
+export default StudentViewCommonLayout;
