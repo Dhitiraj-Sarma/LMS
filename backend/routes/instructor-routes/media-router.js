@@ -4,10 +4,17 @@ import {
   uploadMediaToCloudinary,
   deleteMediaFromCloudinary,
 } from "../../helpers/cloudinary.js";
+import {
+  authenticate,
+  checkInstructorRole,
+} from "../../middleware/auth-middleware.js";
 
 const router = express.Router();
 
 const upload = multer({ dest: "uploads/" });
+
+router.use(authenticate);
+router.use(checkInstructorRole);
 
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {

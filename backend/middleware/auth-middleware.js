@@ -26,7 +26,7 @@ export const authenticate = (req, res, next) => {
     req.user = payload;
 
     // 4) Pass control to the next middleware/handler
-    return next();
+    next();
   } catch (err) {
     // 5) If verification failed, send a 403
     return res.status(403).json({
@@ -41,6 +41,16 @@ export const checkInstructorRole = (req, res, next) => {
     return res.status(403).json({
       success: false,
       message: "Access denied. Instructor privileges required",
+    });
+  }
+  next();
+};
+
+export const checkStudentRole = (req, res, next) => {
+  if (req.user.role !== "user") {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied",
     });
   }
   next();
