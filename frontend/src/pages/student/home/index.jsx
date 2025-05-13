@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { useContext, useEffect } from "react";
 import { StudentContext } from "@/context/student-context";
 import { fetchStudentCourseListService } from "@/services";
+import { useNavigate } from "react-router-dom";
 
 function StudentHomePage() {
   const { studentCoursesList, setStudentCoursesList } =
     useContext(StudentContext);
+  const navigate = useNavigate();
 
   async function fetchAllStudentViewCourses() {
     const res = await fetchStudentCourseListService();
@@ -35,6 +37,7 @@ function StudentHomePage() {
           <Button
             variant="solid"
             className="bg-yellow-300 text-indigo-900 hover:bg-yellow-400 transition-shadow shadow-lg"
+            onClick={() => navigate("/courses")}
           >
             Get Started
           </Button>
