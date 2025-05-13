@@ -19,69 +19,93 @@ function StudentHomePage() {
   useEffect(() => {
     fetchAllStudentViewCourses();
   }, []);
-  console.log(studentCoursesList);
+
   return (
-    <div className="min-h-screen">
-      <section className="flex flex-col lg:flex-row items-center justify-between py-8 px-4 lg:px-8">
-        <div className="lg:w-1/2 lg:pr-12">
-          <h1 className="text-5xl font-bold mb-4">Leaning that gets you</h1>
-          <p className="text-xl">
-            Skills for your present and your future. Get Started with us
+    <div className="min-h-screen bg-gray-50 text-gray-800">
+      {/* Hero */}
+      <section className="flex flex-col-reverse lg:flex-row items-center justify-between py-16 px-6 lg:px-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white rounded-b-3xl">
+        <div className="lg:w-1/2 mt-8 lg:mt-0 lg:pr-12">
+          <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
+            Learning that takes you{" "}
+            <span className="text-yellow-300">further</span>
+          </h1>
+          <p className="text-lg lg:text-xl mb-6 opacity-90">
+            Master new skills for today’s world—and tomorrow’s challenges.
           </p>
+          <Button
+            variant="solid"
+            className="bg-yellow-300 text-indigo-900 hover:bg-yellow-400 transition-shadow shadow-lg"
+          >
+            Get Started
+          </Button>
         </div>
-        <div className="lg:w-full mb-8 lg:mb-0">
+        <div className="lg:w-1/2 flex justify-center">
           <img
             src={banner}
-            alt="banner"
-            width={600}
-            height={400}
-            className="w-full h-auto rounded-lg shadow-lg"
+            alt="Learning banner"
+            className="w-full max-w-md rounded-xl shadow-2xl transform hover:scale-105 transition-transform"
           />
         </div>
       </section>
-      <section className="py-8 px-4 lg:px-8 bg-gray-100">
-        <h2 className="text-2xl font-bold mb-6">Course Categories</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {courseCategories?.map((categoryItem) => (
+
+      {/* Categories */}
+      <section className="py-12 px-6 lg:px-16">
+        <h2 className="text-3xl font-bold text-center mb-8">
+          Course Categories
+        </h2>
+        <div className="flex flex-wrap justify-center gap-4">
+          {courseCategories.map((cat) => (
             <Button
-              className="justify-start"
+              key={cat.id}
               variant="outline"
-              key={categoryItem.id}
+              className="h-14 text-left p-4 bg-white border border-purple-500 text-purple-600 rounded-xl hover:border-purple-50 hover:bg-purple-50 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md"
             >
-              {categoryItem.label}
+              {cat.label}
             </Button>
           ))}
         </div>
       </section>
-      <section className="py-12 px-4 lg:px-8">
-        <h2 className="text-2xl font-bold mb-6">Feature Courses</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {studentCoursesList && studentCoursesList.length > 0 ? (
-            studentCoursesList.map((course) => (
+
+      {/* Featured Courses */}
+      <section className="py-12 px-6 lg:px-16 bg-white">
+        <h2 className="text-3xl font-bold text-center mb-10">
+          Featured Courses
+        </h2>
+        {studentCoursesList && studentCoursesList.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {studentCoursesList.map((course) => (
               <div
-                className="border rounded-lg overflow-hidden shadow cursor-pointer"
                 key={course._id}
+                className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transform hover:-translate-y-1 transition"
               >
-                <img
-                  src={course?.image}
-                  alt=""
-                  width={300}
-                  height={150}
-                  className="w-full h-50 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-bold mb-2">{course?.title}</h3>
-                  <p className="text-sm text-gray-700 mb-2">
-                    {course?.instructorName}
+                <div className="overflow-hidden">
+                  <img
+                    src={course.image}
+                    alt={course.title}
+                    className="w-full h-48 object-cover hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+                <div className="p-5">
+                  <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
+                  <p className="text-sm text-gray-500 mb-4">
+                    {course.instructorName}
                   </p>
-                  <p className="font-bold text-[16px]">${course?.pricing}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold">${course.pricing}</span>
+                    <Button
+                      variant="solid"
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition"
+                    >
+                      Enroll
+                    </Button>
+                  </div>
                 </div>
               </div>
-            ))
-          ) : (
-            <span>No Courss Found</span>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500">No Courses Found</p>
+        )}
       </section>
     </div>
   );
