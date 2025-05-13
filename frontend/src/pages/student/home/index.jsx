@@ -1,12 +1,25 @@
 import { courseCategories } from "@/config";
 import banner from "/banner-img.png";
 import { Button } from "@/components/ui/button";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { StudentContext } from "@/context/student-context";
+import { fetchStudentCourseListService } from "@/services";
 
 function StudentHomePage() {
   const { studentCoursesList, setStudentCoursesList } =
     useContext(StudentContext);
+
+  async function fetchAllStudentViewCourses() {
+    const res = await fetchStudentCourseListService();
+    if (res?.success) {
+      setStudentCoursesList(res.data);
+    }
+  }
+
+  useEffect(() => {
+    fetchAllStudentViewCourses();
+  }, []);
+  console.log(studentCoursesList);
   return (
     <div className="min-h-screen">
       <section className="flex flex-col lg:flex-row items-center justify-between py-8 px-4 lg:px-8">
@@ -38,6 +51,36 @@ function StudentHomePage() {
               {categoryItem.label}
             </Button>
           ))}
+        </div>
+      </section>
+      <section className="py-12 px-4 lg:px-8">
+        <h2 className="text-2xl font-bold mb-6">Feature Courses</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {studentCoursesList && studentCoursesList.length > 0 ? (
+            studentCoursesList.map((course) => (
+              <div
+                className="border rounded-lg overflow-hidden shadow cursor-pointer"
+                key={course._id}
+              >
+                <img
+                  src={course?.image}
+                  alt=""
+                  width={300}
+                  height={150}
+                  className="w-full h-50 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="font-bold mb-2">{course?.title}</h3>
+                  <p className="text-sm text-gray-700 mb-2">
+                    {course?.instructorName}
+                  </p>
+                  <p className="font-bold text-[16px]">${course?.pricing}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <span>No Courss Found</span>
+          )}
         </div>
       </section>
     </div>
