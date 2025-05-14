@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -9,70 +10,185 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { filterOptions, sortOptions } from "@/config";
+import { StudentContext } from "@/context/student-context";
+import { fetchStudentCourseListService } from "@/services";
 import { ArrowUpDownIcon } from "lucide-react";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { createSearchParams, useSearchParams } from "react-router-dom";
+
+function createSearchParamsHelper(filters) {
+  const queryParams = [];
+  for (const [key, value] of Object.entries(filters)) {
+    if (Array.isArray(value) && value.length > 0) {
+      const paramValue = value.join(",");
+      queryParams.push(`${key}=${encodeURIComponent(paramValue)}`);
+    }
+  }
+
+  return queryParams.join("&");
+}
 
 function StudentCoursePage() {
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState("price-lowtohigh");
+  const [filters, setFilters] = useState({});
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { studentCoursesList, setStudentCoursesList } =
+    useContext(StudentContext);
 
-  function handleFilterOnChange(item, optionId) {}
+  async function fetchAllStudentViewCourses() {
+    const res = await fetchStudentCourseListService();
+    if (res?.success) {
+      setStudentCoursesList(res.data);
+    }
+  }
+
+  useEffect(() => {
+    const buildQueryStringsForFilters = createSearchParamsHelper(filters);
+    setSearchParams(new URLSearchParams(buildQueryStringsForFilters));
+  }, [filters]);
+
+  useEffect(() => {
+    fetchAllStudentViewCourses();
+  }, []);
+
+  function handleFilterOnChange(item, option) {
+    let copy = { ...filters };
+    const indexOfCurrentSection = Object.keys(copy).indexOf(item);
+
+    if (indexOfCurrentSection === -1) {
+      copy = {
+        ...copy,
+        [item]: [option.id],
+      };
+    } else {
+      const indexOfCurrentOption = copy[item].indexOf(option.id);
+
+      if (indexOfCurrentOption === -1) {
+        copy[item].push(option.id);
+      } else {
+        copy[item].splice(indexOfCurrentOption, 1);
+      }
+    }
+
+    setFilters(copy);
+    sessionStorage.setItem("filters", JSON.stringify(copy));
+  }
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">All Courses</h1>
-      <div className="flex flex-col md:flex-row gap-4">
-        <aside className="w-full md:w-64 space-y-4">
-          <div className="p-4 space-y-4">
-            {/* Filters */}
-            {Object.keys(filterOptions).map((item) => (
-              <div className="p-4 space-y-4" key={item}>
-                <h3 className="font-bold mb-3">{item.toUpperCase()}</h3>
-                <div className="grid gap-2 mt-2">
-                  {filterOptions[item].map((option) => (
-                    <Label className="flex font-medium items-center gap-3">
-                      <Checkbox
-                        checked={false}
-                        onCheckedChange={() =>
-                          handleFilterOnChange(item, option.id)
-                        }
-                      />
-                      {option.label}
-                    </Label>
-                  ))}
-                </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Page Header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <h1 className="text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500">
+          All Courses
+        </h1>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-6">
+        {/* Sidebar Filters */}
+        <aside className="w-full md:w-64 bg-white rounded-lg shadow p-4 space-y-6 hidden md:block">
+          {Object.keys(filterOptions).map((group) => (
+            <div key={group}>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                {group.toUpperCase()}
+              </h3>
+              <div className="space-y-2">
+                {filterOptions[group].map((opt) => (
+                  <Label
+                    htmlFor={`filter-${group}-${opt.id}`}
+                    className="flex items-center gap-2 text-gray-600"
+                    key={opt.id}
+                  >
+                    <Checkbox
+                      id={`filter-${group}-${opt.id}`}
+                      checked={
+                        filters &&
+                        Object.keys(filters).length > 0 &&
+                        filters[group] &&
+                        filters[group].indexOf(opt.id) > -1
+                      }
+                      onCheckedChange={() => handleFilterOnChange(group, opt)}
+                      className="text-indigo-600"
+                    />
+                    {opt.label}
+                  </Label>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </aside>
-        <main className="flex-1">
-          <div className="flex justify-end items-center mb-4 gap-5">
+
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col">
+          {/* Sort + Result Count */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex items-center gap-2 p-5"
+                  className="flex items-center gap-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition"
                 >
-                  <ArrowUpDownIcon className="h-4 w-4" />
-                  <span className="text-[16px] font-medium">Sort By</span>
+                  <ArrowUpDownIcon className="w-4 h-4" />
+                  <span className="text-sm">Sort By</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuRadioGroup
                   value={sort}
                   onValueChange={(value) => setSort(value)}
                 >
-                  {sortOptions.map((sortItem) => (
-                    <DropdownMenuRadioItem
-                      value={sortItem.id}
-                      key={sortItem.id}
-                    >
-                      {sortItem.label}
+                  {sortOptions.map((so) => (
+                    <DropdownMenuRadioItem value={so.id} key={so.id}>
+                      {so.label}
                     </DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
+            <span className="text-sm font-medium text-gray-700">
+              {studentCoursesList?.length ?? 0} Results
+            </span>
           </div>
+
+          {/* Courses Grid */}
+          {studentCoursesList && studentCoursesList.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {studentCoursesList.map((course) => (
+                <Card
+                  key={course._id}
+                  className="bg-white rounded-lg shadow hover:shadow-md transition"
+                >
+                  <CardContent className="flex flex-col h-full p-4">
+                    <div className="w-full h-40 bg-gray-200 rounded overflow-hidden mb-3">
+                      <img
+                        src={course.image}
+                        alt={course.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <CardTitle className="text-lg font-semibold mb-1">
+                      {course.title}
+                    </CardTitle>
+                    <p className="text-sm text-gray-500">
+                      Created by{" "}
+                      <span className="font-medium text-gray-700">
+                        {course.instructorName}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-sm text-gray-700">
+                      {`${course.curriculum.length} ${
+                        course.curriculum.length === 1 ? "Lecture" : "Lectures"
+                      } • ${course.level.toUpperCase()} Level`}
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-indigo-600">
+                      ${course.pricing}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 py-12">No Courses Found</p>
+          )}
         </main>
       </div>
     </div>
