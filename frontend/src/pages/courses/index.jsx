@@ -46,21 +46,6 @@ function StudentCoursePage() {
     }
   }
 
-  useEffect(() => {
-    const buildQueryStringsForFilters = createSearchParamsHelper(filters);
-    setSearchParams(new URLSearchParams(buildQueryStringsForFilters));
-  }, [filters]);
-
-  useEffect(() => {
-    setSort("price-lowtohigh");
-    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
-  }, []);
-
-  useEffect(() => {
-    if (filters !== null && sort !== null)
-      fetchAllStudentViewCourses(filters, sort);
-  }, [filters, sort]);
-
   function handleFilterOnChange(item, option) {
     let copy = { ...filters };
     const indexOfCurrentSection = Object.keys(copy).indexOf(item);
@@ -83,6 +68,28 @@ function StudentCoursePage() {
     setFilters(copy);
     sessionStorage.setItem("filters", JSON.stringify(copy));
   }
+
+  useEffect(() => {
+    const buildQueryStringsForFilters = createSearchParamsHelper(filters);
+    setSearchParams(new URLSearchParams(buildQueryStringsForFilters));
+  }, [filters]);
+
+  useEffect(() => {
+    setSort("price-lowtohigh");
+    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
+  }, []);
+
+  useEffect(() => {
+    if (filters !== null && sort !== null)
+      fetchAllStudentViewCourses(filters, sort);
+  }, [filters, sort]);
+
+  useEffect(() => {
+    return () => {
+      sessionStorage.removeItem("filters");
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Page Header */}
