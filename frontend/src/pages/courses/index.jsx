@@ -14,7 +14,7 @@ import { StudentContext } from "@/context/student-context";
 import { fetchStudentCourseListService } from "@/services";
 import { ArrowUpDownIcon } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
-import { createSearchParams, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 function createSearchParamsHelper(filters) {
   const queryParams = [];
@@ -35,8 +35,12 @@ function StudentCoursePage() {
   const { studentCoursesList, setStudentCoursesList } =
     useContext(StudentContext);
 
-  async function fetchAllStudentViewCourses() {
-    const res = await fetchStudentCourseListService();
+  async function fetchAllStudentViewCourses(filters, sort) {
+    const query = new URLSearchParams({
+      ...filters,
+      sortBy: sort,
+    });
+    const res = await fetchStudentCourseListService(query);
     if (res?.success) {
       setStudentCoursesList(res.data);
     }
@@ -48,8 +52,9 @@ function StudentCoursePage() {
   }, [filters]);
 
   useEffect(() => {
-    fetchAllStudentViewCourses();
-  }, []);
+    if (filters !== null && sort !== null)
+      fetchAllStudentViewCourses(filters, sort);
+  }, [filters, sort]);
 
   function handleFilterOnChange(item, option) {
     let copy = { ...filters };
