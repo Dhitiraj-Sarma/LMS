@@ -26,7 +26,7 @@ export const getAllCourses = async (req, res) => {
         sort.pricing = 1;
         break;
       case "price-hightolow":
-        sort.pricing = 1;
+        sort.pricing = -1;
         break;
       case "title-atoz":
         sort.title = 1;
@@ -40,14 +40,6 @@ export const getAllCourses = async (req, res) => {
         break;
     }
     const courseList = await Course.find(filters).sort(sort);
-
-    if (courseList.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No Course Found",
-        data: [],
-      });
-    }
 
     res.status(200).json({
       success: true,

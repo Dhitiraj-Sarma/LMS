@@ -16,24 +16,24 @@ import { ArrowUpDownIcon } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-function createSearchParamsHelper(filters) {
-  const queryParams = [];
-  for (const [key, value] of Object.entries(filters)) {
-    if (Array.isArray(value) && value.length > 0) {
-      const paramValue = value.join(",");
-      queryParams.push(`${key}=${encodeURIComponent(paramValue)}`);
-    }
-  }
-
-  return queryParams.join("&");
-}
-
 function StudentCoursePage() {
   const [sort, setSort] = useState("price-lowtohigh");
   const [filters, setFilters] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
   const { studentCoursesList, setStudentCoursesList } =
     useContext(StudentContext);
+
+  function createSearchParamsHelper(filters) {
+    const queryParams = [];
+    for (const [key, value] of Object.entries(filters)) {
+      if (Array.isArray(value) && value.length > 0) {
+        const paramValue = value.join(",");
+        queryParams.push(`${key}=${encodeURIComponent(paramValue)}`);
+      }
+    }
+
+    return queryParams.join("&");
+  }
 
   async function fetchAllStudentViewCourses(filters, sort) {
     const query = new URLSearchParams({
@@ -50,6 +50,11 @@ function StudentCoursePage() {
     const buildQueryStringsForFilters = createSearchParamsHelper(filters);
     setSearchParams(new URLSearchParams(buildQueryStringsForFilters));
   }, [filters]);
+
+  useEffect(() => {
+    setSort("price-lowtohigh");
+    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
+  }, []);
 
   useEffect(() => {
     if (filters !== null && sort !== null)
