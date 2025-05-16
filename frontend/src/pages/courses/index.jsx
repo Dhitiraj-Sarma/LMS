@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { filterOptions, sortOptions } from "@/config";
 import { StudentContext } from "@/context/student-context";
 import { fetchStudentCourseListService } from "@/services";
@@ -20,7 +21,7 @@ function StudentCoursePage() {
   const [sort, setSort] = useState("price-lowtohigh");
   const [filters, setFilters] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
-  const { studentCoursesList, setStudentCoursesList } =
+  const { studentCoursesList, setStudentCoursesList, loading, setLoading } =
     useContext(StudentContext);
 
   function createSearchParamsHelper(filters) {
@@ -43,6 +44,7 @@ function StudentCoursePage() {
     const res = await fetchStudentCourseListService(query);
     if (res?.success) {
       setStudentCoursesList(res.data);
+      setLoading(false);
     }
   }
 
@@ -203,6 +205,8 @@ function StudentCoursePage() {
                 </Card>
               ))}
             </div>
+          ) : loading ? (
+            <Skeleton />
           ) : (
             <p className="text-center text-gray-500 py-12">No Courses Found</p>
           )}
