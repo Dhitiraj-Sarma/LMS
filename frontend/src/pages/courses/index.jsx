@@ -15,7 +15,7 @@ import { StudentContext } from "@/context/student-context";
 import { fetchStudentCourseListService } from "@/services";
 import { ArrowUpDownIcon } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 function StudentCoursePage() {
   const [sort, setSort] = useState("price-lowtohigh");
@@ -23,6 +23,8 @@ function StudentCoursePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { studentCoursesList, setStudentCoursesList, loading, setLoading } =
     useContext(StudentContext);
+
+  const navigate = useNavigate();
 
   function createSearchParamsHelper(filters) {
     const queryParams = [];
@@ -175,6 +177,7 @@ function StudentCoursePage() {
                 <Card
                   key={course._id}
                   className="bg-white rounded-lg shadow hover:shadow-md transition"
+                  onClick={() => navigate(`/course/details/${course?._id}`)}
                 >
                   <CardContent className="flex flex-col h-full p-4">
                     <div className="w-full h-40 bg-gray-200 rounded overflow-hidden mb-3">
