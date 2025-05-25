@@ -78,7 +78,7 @@ export async function fetchStudentCourseListService(query) {
   return res.data;
 }
 
-export async function fetchStudentCourseDetailsService({ courseId }) {
+export async function fetchStudentCourseDetailsService(courseId) {
   const res = await axiosInstance.get(
     `/student/course/get/details/${courseId}`
   );
