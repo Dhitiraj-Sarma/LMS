@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import VideoPlayer from "@/components/video-player";
 import { StudentContext } from "@/context/student-context";
 import { fetchStudentCourseDetailsService } from "@/services";
-import { CheckCircle, Globe } from "lucide-react";
+import { CheckCircle, Globe, LockIcon, PlayCircleIcon } from "lucide-react";
 import { useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
@@ -17,6 +18,11 @@ function StudentCourseDetails() {
   } = useContext(StudentContext);
 
   const { id } = useParams();
+
+  const getIndexOfFreePreviewUrl =
+    studentCourseDetails !== null
+      ? studentCourseDetails?.curriculum?.findIndex((item) => item.freePreview)
+      : -1;
 
   async function fetchStudentCourseDetails() {
     const res = await fetchStudentCourseDetailsService(
@@ -109,7 +115,50 @@ function StudentCourseDetails() {
               </ul>
             </CardContent>
           </Card>
+          <Card className="mb-8 mt-8">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold">
+                Course Curriculum
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {studentCourseDetails?.curriculum?.map((cur, index) => (
+                <li
+                  key={index}
+                  className={`${
+                    cur?.freePreview ? "cursor-pointer" : "cursor-not-allowed"
+                  } flex items-center mb-4`}
+                >
+                  {cur?.freePreview ? (
+                    <PlayCircleIcon className="mr-2 h-4 w-4" />
+                  ) : (
+                    <LockIcon className="h-4 w-4 mr-2" />
+                  )}
+                  <span>{cur?.title}</span>
+                </li>
+              ))}
+            </CardContent>
+          </Card>
         </main>
+        <aside className="w-full md:w-[500px]">
+          <Card className="sticky top-4">
+            <CardContent className="px-8">
+              <div className="aspect-video mb-4 rounded-lg flex items-center justify-center">
+                <VideoPlayer
+                  url={
+                    getIndexOfFreePreviewUrl !== -1
+                      ? studentCourseDetails?.curriculum[
+                          getIndexOfFreePreviewUrl
+                        ].videoUrl
+                      : ""
+                  }
+                  width="450px"
+                  height="200px"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </aside>
       </div>
     </div>
   );
