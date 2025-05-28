@@ -1,26 +1,41 @@
 import { courseCategories } from "@/config";
 import banner from "/banner-img.png";
 import { Button } from "@/components/ui/button";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { StudentContext } from "@/context/student-context";
 import { fetchStudentCourseListService } from "@/services";
 import { useNavigate } from "react-router-dom";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
 
 function StudentHomePage() {
   const { studentCoursesList, setStudentCoursesList } =
     useContext(StudentContext);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 8;
   const navigate = useNavigate();
 
-  async function fetchAllStudentViewCourses() {
-    const res = await fetchStudentCourseListService();
+  async function fetchAllStudentViewCourses(page, limit) {
+    const query = new URLSearchParams({
+      page: page,
+      limit: limit,
+    });
+    const res = await fetchStudentCourseListService(query);
+    console.log(res);
     if (res?.success) {
       setStudentCoursesList(res.data);
+      setTotalPages(res.pagination.totalPages);
     }
   }
 
   useEffect(() => {
-    fetchAllStudentViewCourses();
-  }, []);
+    fetchAllStudentViewCourses(page, limit);
+  }, [page]);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
@@ -75,37 +90,62 @@ function StudentHomePage() {
           Featured Courses
         </h2>
         {studentCoursesList && studentCoursesList.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {studentCoursesList.map((course) => (
-              <div
-                key={course._id}
-                className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transform hover:-translate-y-1 transition"
-              >
-                <div className="overflow-hidden">
-                  <img
-                    src={course.image}
-                    alt={course.title}
-                    className="w-full h-48 object-cover hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-5">
-                  <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
-                  <p className="text-sm text-gray-500 mb-4">
-                    {course.instructorName}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold">${course.pricing}</span>
-                    <Button
-                      variant="solid"
-                      className="bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition"
-                    >
-                      Enroll
-                    </Button>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {studentCoursesList.map((course) => (
+                <div
+                  key={course._id}
+                  className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transform hover:-translate-y-1 transition"
+                >
+                  <div className="overflow-hidden">
+                    <img
+                      src={course.image}
+                      alt={course.title}
+                      className="w-full h-48 object-cover hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-xl font-semibold mb-2">
+                      {course.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                      {course.instructorName}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold">
+                        ${course.pricing}
+                      </span>
+                      <Button
+                        variant="solid"
+                        className="bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition"
+                      >
+                        Enroll
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            <div className="flex justify-center space-x-2 mt-6">
+              <Pagination>
+                <PaginationContent>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (p) => (
+                      <PaginationItem key={p}>
+                        <PaginationLink
+                          isActive={p === page}
+                          onClick={() => setPage(p)}
+                          className="cursor-pointer"
+                        >
+                          {p}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+                  )}
+                </PaginationContent>
+              </Pagination>
+            </div>
+          </>
         ) : (
           <p className="text-center text-gray-500">No Courses Found</p>
         )}

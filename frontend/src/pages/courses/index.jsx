@@ -23,14 +23,23 @@ import { ArrowUpDownIcon, Filter as FilterIcon } from "lucide-react";
 import { filterOptions, sortOptions } from "@/config";
 import { StudentContext } from "@/context/student-context";
 import { fetchStudentCourseListService } from "@/services";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
 
 export default function StudentCoursePage() {
   const [sort, setSort] = useState("price-lowtohigh");
   const [filters, setFilters] = useState({});
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
   const { studentCoursesList, setStudentCoursesList, loading, setLoading } =
     useContext(StudentContext);
   const navigate = useNavigate();
+  const limit = 6;
 
   function createSearchParamsHelper(filters) {
     const queryParams = [];
@@ -42,12 +51,18 @@ export default function StudentCoursePage() {
     return queryParams.join("&");
   }
 
-  async function fetchAllStudentViewCourses(filters, sort) {
+  async function fetchAllStudentViewCourses(filters, sort, page, limit) {
     setLoading(true);
-    const query = new URLSearchParams({ ...filters, sortBy: sort });
+    const query = new URLSearchParams({
+      ...filters,
+      sortBy: sort,
+      page: page,
+      limit: limit,
+    });
     const res = await fetchStudentCourseListService(query);
-    if (res?.success) {
+    if (res.success) {
       setStudentCoursesList(res.data);
+      setTotalPages(res.pagination.totalPages);
     }
     setLoading(false);
   }
@@ -92,8 +107,8 @@ export default function StudentCoursePage() {
 
   // fetch courses whenever filters or sort change
   useEffect(() => {
-    fetchAllStudentViewCourses(filters, sort);
-  }, [filters, sort]);
+    fetchAllStudentViewCourses(filters, sort, page, limit);
+  }, [filters, sort, page]);
 
   // cleanup
   useEffect(() => {
@@ -187,8 +202,7 @@ export default function StudentCoursePage() {
                   <DialogClose
                     className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
                     aria-label="Close"
-                  >
-                  </DialogClose>
+                  ></DialogClose>
                   <div className="pt-6 space-y-6">
                     {Object.keys(filterOptions).map((group) => (
                       <div key={group}>
@@ -230,42 +244,65 @@ export default function StudentCoursePage() {
 
           {/* Courses Grid / Loading / Empty State */}
           {studentCoursesList && studentCoursesList.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {studentCoursesList.map((course) => (
-                <Card
-                  key={course._id}
-                  className="bg-white rounded-lg shadow hover:shadow-md transition cursor-pointer"
-                  onClick={() => navigate(`/course/details/${course._id}`)}
-                >
-                  <CardContent className="flex flex-col h-full p-4">
-                    <div className="w-full h-40 bg-gray-200 rounded overflow-hidden mb-3">
-                      <img
-                        src={course.image}
-                        alt={course.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <CardTitle className="text-lg font-semibold mb-1">
-                      {course.title}
-                    </CardTitle>
-                    <p className="text-sm text-gray-500">
-                      Created by{" "}
-                      <span className="font-medium text-gray-700">
-                        {course.instructorName}
-                      </span>
-                    </p>
-                    <p className="mt-1 text-sm text-gray-700">
-                      {course.curriculum.length}{" "}
-                      {course.curriculum.length === 1 ? "Lecture" : "Lectures"}{" "}
-                      • {course.level.toUpperCase()} Level
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-indigo-600">
-                      ${course.pricing}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {studentCoursesList.map((course) => (
+                  <Card
+                    key={course._id}
+                    className="bg-white rounded-lg shadow hover:shadow-md transition cursor-pointer"
+                    onClick={() => navigate(`/course/details/${course._id}`)}
+                  >
+                    <CardContent className="flex flex-col h-full p-4">
+                      <div className="w-full h-40 bg-gray-200 rounded overflow-hidden mb-3">
+                        <img
+                          src={course.image}
+                          alt={course.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardTitle className="text-lg font-semibold mb-1">
+                        {course.title}
+                      </CardTitle>
+                      <p className="text-sm text-gray-500">
+                        Created by{" "}
+                        <span className="font-medium text-gray-700">
+                          {course.instructorName}
+                        </span>
+                      </p>
+                      <p className="mt-1 text-sm text-gray-700">
+                        {course.curriculum.length}{" "}
+                        {course.curriculum.length === 1
+                          ? "Lecture"
+                          : "Lectures"}{" "}
+                        • {course.level.toUpperCase()} Level
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-indigo-600">
+                        ${course.pricing}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <div className="flex justify-center space-x-2 mt-6">
+                <Pagination>
+                  <PaginationContent>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (p) => (
+                        <PaginationItem key={p}>
+                          <PaginationLink
+                            isActive={p === page}
+                            onClick={() => setPage(p)}
+                            className="cursor-pointer"
+                          >
+                            {p}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    )}
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            </>
           ) : loading ? (
             <Skeleton className="h-64" />
           ) : (

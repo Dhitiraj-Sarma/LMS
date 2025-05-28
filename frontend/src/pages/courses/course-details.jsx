@@ -183,7 +183,10 @@ function StudentCourseDetails() {
                   ${studentCourseDetails?.pricing}
                 </span>
               </div>
-              <Button className="w-full py-3 text-lg font-semibold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white">
+              <Button
+                className="w-full py-3 text-lg font-semibold"
+                variant="secondary"
+              >
                 Buy Now
               </Button>
             </CardContent>
