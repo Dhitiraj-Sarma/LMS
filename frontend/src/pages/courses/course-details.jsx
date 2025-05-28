@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import VideoPlayer from "@/components/video-player";
@@ -5,7 +6,7 @@ import { StudentContext } from "@/context/student-context";
 import { fetchStudentCourseDetailsService } from "@/services";
 import { CheckCircle, Globe, LockIcon, PlayCircleIcon } from "lucide-react";
 import { useContext, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 function StudentCourseDetails() {
   const {
@@ -18,6 +19,7 @@ function StudentCourseDetails() {
   } = useContext(StudentContext);
 
   const { id } = useParams();
+  const location = useLocation();
 
   const getIndexOfFreePreviewUrl =
     studentCourseDetails !== null
@@ -50,41 +52,52 @@ function StudentCourseDetails() {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (!location.pathname.includes("course/details")) {
+      setStudentCourseDetails(null);
+      setCurrentStudentCourseDetailsId(null);
+    }
+  }, [location.pathname]);
+
   if (loading) {
-    <Skeleton />;
+    return (
+      <div className="max-w-4xl mx-auto p-4 space-y-6">
+        <Skeleton className="h-12 w-3/4 rounded" />
+        <Skeleton className="h-6 w-1/2 rounded" />
+        <Skeleton className="h-4 w-full rounded" count={3} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Skeleton className="h-40 w-full rounded" />
+          <Skeleton className="h-40 w-full rounded" />
+        </div>
+      </div>
+    );
   }
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-4xl mx-auto p-4 space-y-8">
       {/* Gradient header card */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-3 leading-tight">
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white p-8 rounded-xl shadow-lg transform hover:scale-[1.01] transition-transform">
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-2 leading-tight">
           {studentCourseDetails?.title}
         </h1>
-        <p className="text-lg md:text-xl text-indigo-100 mb-6">
+        <p className="text-lg md:text-xl text-indigo-100 mb-4">
           {studentCourseDetails?.subtitle}
         </p>
-
+        <p className="prose prose-indigo prose-sm md:prose-base mb-6">
+          {studentCourseDetails?.description}
+        </p>
         <div className="flex flex-wrap gap-3 text-sm">
           <span className="bg-white/20 px-3 py-1 rounded-full">
-            <span className="font-medium">Instructor:</span>{" "}
-            {studentCourseDetails?.instructorName}
+            <strong>Instructor:</strong> {studentCourseDetails?.instructorName}
           </span>
-
           <span className="bg-white/20 px-3 py-1 rounded-full">
-            <span className="font-medium">Created:</span>{" "}
-            {studentCourseDetails?.date.split("T")[0]}
+            <strong>Created:</strong> {studentCourseDetails?.date.split("T")[0]}
           </span>
-
           <span className="bg-white/20 px-3 py-1 rounded-full flex items-center">
-            <Globe className="mr-1 h-4 w-4 text-indigo-200" />
-            <span className="font-medium">
-              {studentCourseDetails?.primaryLanguage}
-            </span>
+            <Globe className="mr-1 h-4 w-4 text-indigo-200 animate-pulse" />
+            <strong>{studentCourseDetails?.primaryLanguage}</strong>
           </span>
-
           <span className="bg-white/20 px-3 py-1 rounded-full">
-            <span className="font-medium">Enrolled:</span>{" "}
-            {studentCourseDetails?.students.length}{" "}
+            <strong>Enrolled:</strong> {studentCourseDetails?.students.length}{" "}
             {studentCourseDetails?.students.length <= 1
               ? "Student"
               : "Students"}
@@ -93,9 +106,9 @@ function StudentCourseDetails() {
       </div>
 
       {/* Objectives card */}
-      <div className="flex flex-col md:flex-row gap-8 mt-8">
-        <main className="flex-grow">
-          <Card className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg shadow-md">
+      <div className="flex flex-col lg:flex-row gap-8">
+        <main className="flex-1 space-y-8">
+          <Card className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-xl shadow-md">
             <CardHeader className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
               <CardTitle className="text-2xl font-bold">
                 What you’ll learn
@@ -106,7 +119,7 @@ function StudentCourseDetails() {
                 {studentCourseDetails?.objectives.split(",").map((obj, idx) => (
                   <li
                     key={idx}
-                    className="flex items-start space-x-2 text-gray-800 dark:text-gray-200"
+                    className="flex items-start space-x-2 hover:text-indigo-600 transition-colors"
                   >
                     <CheckCircle className="mt-1 h-5 w-5 text-green-600" />
                     <span>{obj.trim()}</span>
@@ -115,35 +128,46 @@ function StudentCourseDetails() {
               </ul>
             </CardContent>
           </Card>
-          <Card className="mb-8 mt-8">
-            <CardHeader>
+
+          <Card className="rounded-xl shadow-md overflow-hidden">
+            <CardHeader className="px-6 py-4 border-b">
               <CardTitle className="text-2xl font-bold">
                 Course Curriculum
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {studentCourseDetails?.curriculum?.map((cur, index) => (
-                <li
-                  key={index}
-                  className={`${
-                    cur?.freePreview ? "cursor-pointer" : "cursor-not-allowed"
-                  } flex items-center mb-4`}
-                >
-                  {cur?.freePreview ? (
-                    <PlayCircleIcon className="mr-2 h-4 w-4" />
-                  ) : (
-                    <LockIcon className="h-4 w-4 mr-2" />
-                  )}
-                  <span>{cur?.title}</span>
-                </li>
-              ))}
+            <CardContent className="p-6 space-y-4">
+              <ul>
+                {studentCourseDetails?.curriculum.map((lesson, idx) => (
+                  <li
+                    key={idx}
+                    className={`flex items-center p-2 rounded-lg ${
+                      lesson.freePreview
+                        ? "hover:bg-indigo-50 cursor-pointer"
+                        : "opacity-60 cursor-not-allowed"
+                    } transition-colors relative`}
+                  >
+                    {lesson.freePreview ? (
+                      <PlayCircleIcon className="mr-3 h-5 w-5 text-indigo-500 animate-pulse" />
+                    ) : (
+                      <>
+                        <LockIcon className="mr-3 h-5 w-5 text-gray-400" />
+                        {/* Lock overlay */}
+                        <div className="absolute inset-0 bg-white dark:bg-gray-900 opacity-30 rounded-lg" />
+                      </>
+                    )}
+                    <span className="relative z-10">{lesson.title}</span>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
         </main>
-        <aside className="w-full md:w-[500px]">
-          <Card className="sticky top-4">
-            <CardContent className="px-8">
-              <div className="aspect-video mb-4 rounded-lg flex items-center justify-center">
+
+        {/* — Sidebar */}
+        <aside className="w-full lg:w-96 space-y-6 sticky top-4 self-start">
+          <Card className="rounded-xl shadow-lg">
+            <CardContent className="p-6">
+              <div className="aspect-video rounded-lg overflow-hidden mb-4 bg-black">
                 <VideoPlayer
                   url={
                     getIndexOfFreePreviewUrl !== -1
@@ -152,10 +176,16 @@ function StudentCourseDetails() {
                         ].videoUrl
                       : ""
                   }
-                  width="450px"
-                  height="200px"
                 />
               </div>
+              <div className="mb-4">
+                <span className="text-3xl font-extrabold">
+                  ${studentCourseDetails?.pricing}
+                </span>
+              </div>
+              <Button className="w-full py-3 text-lg font-semibold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white">
+                Buy Now
+              </Button>
             </CardContent>
           </Card>
         </aside>

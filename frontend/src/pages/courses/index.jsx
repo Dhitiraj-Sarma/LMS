@@ -1,93 +1,101 @@
+import { useState, useEffect, useContext } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { ArrowUpDownIcon, Filter as FilterIcon } from "lucide-react";
+
 import { filterOptions, sortOptions } from "@/config";
 import { StudentContext } from "@/context/student-context";
 import { fetchStudentCourseListService } from "@/services";
-import { ArrowUpDownIcon } from "lucide-react";
-import { useContext, useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 
-function StudentCoursePage() {
+export default function StudentCoursePage() {
   const [sort, setSort] = useState("price-lowtohigh");
   const [filters, setFilters] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
   const { studentCoursesList, setStudentCoursesList, loading, setLoading } =
     useContext(StudentContext);
-
   const navigate = useNavigate();
 
   function createSearchParamsHelper(filters) {
     const queryParams = [];
     for (const [key, value] of Object.entries(filters)) {
       if (Array.isArray(value) && value.length > 0) {
-        const paramValue = value.join(",");
-        queryParams.push(`${key}=${encodeURIComponent(paramValue)}`);
+        queryParams.push(`${key}=${encodeURIComponent(value.join(","))}`);
       }
     }
-
     return queryParams.join("&");
   }
 
   async function fetchAllStudentViewCourses(filters, sort) {
-    const query = new URLSearchParams({
-      ...filters,
-      sortBy: sort,
-    });
+    setLoading(true);
+    const query = new URLSearchParams({ ...filters, sortBy: sort });
     const res = await fetchStudentCourseListService(query);
     if (res?.success) {
       setStudentCoursesList(res.data);
-      setLoading(false);
     }
+    setLoading(false);
   }
 
-  function handleFilterOnChange(item, option) {
-    let copy = { ...filters };
-    const indexOfCurrentSection = Object.keys(copy).indexOf(item);
-
-    if (indexOfCurrentSection === -1) {
-      copy = {
-        ...copy,
-        [item]: [option.id],
-      };
+  function handleFilterOnChange(group, option) {
+    const copy = { ...filters };
+    if (!copy[group]) {
+      copy[group] = [option.id];
     } else {
-      const indexOfCurrentOption = copy[item].indexOf(option.id);
-
-      if (indexOfCurrentOption === -1) {
-        copy[item].push(option.id);
+      const idx = copy[group].indexOf(option.id);
+      if (idx === -1) {
+        copy[group].push(option.id);
       } else {
-        copy[item].splice(indexOfCurrentOption, 1);
+        copy[group].splice(idx, 1);
+      }
+      if (copy[group].length === 0) {
+        delete copy[group];
       }
     }
-
     setFilters(copy);
     sessionStorage.setItem("filters", JSON.stringify(copy));
   }
 
-  useEffect(() => {
-    const buildQueryStringsForFilters = createSearchParamsHelper(filters);
-    setSearchParams(new URLSearchParams(buildQueryStringsForFilters));
-  }, [filters]);
-
+  // restore filters on mount
   useEffect(() => {
     setSort("price-lowtohigh");
-    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
+    const saved = sessionStorage.getItem("filters");
+    if (saved) {
+      try {
+        setFilters(JSON.parse(saved));
+      } catch {
+        setFilters({});
+      }
+    }
   }, []);
 
+  // sync filters → URL
   useEffect(() => {
-    if (filters !== null && sort !== null)
-      fetchAllStudentViewCourses(filters, sort);
+    const qs = createSearchParamsHelper(filters);
+    setSearchParams(new URLSearchParams(qs));
+  }, [filters, setSearchParams]);
+
+  // fetch courses whenever filters or sort change
+  useEffect(() => {
+    fetchAllStudentViewCourses(filters, sort);
   }, [filters, sort]);
 
+  // cleanup
   useEffect(() => {
     return () => {
       sessionStorage.removeItem("filters");
@@ -104,8 +112,8 @@ function StudentCoursePage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-6">
-        {/* Sidebar Filters */}
-        <aside className="w-full md:w-64 bg-white rounded-lg shadow p-4 space-y-6 hidden md:block">
+        {/* Sidebar Filters (desktop only) */}
+        <aside className="hidden md:block w-full md:w-64 bg-white rounded-lg shadow p-4 space-y-6">
           {Object.keys(filterOptions).map((group) => (
             <div key={group}>
               <h3 className="text-sm font-semibold text-gray-700 mb-2">
@@ -120,12 +128,7 @@ function StudentCoursePage() {
                   >
                     <Checkbox
                       id={`filter-${group}-${opt.id}`}
-                      checked={
-                        filters &&
-                        Object.keys(filters).length > 0 &&
-                        filters[group] &&
-                        filters[group].indexOf(opt.id) > -1
-                      }
+                      checked={filters[group]?.includes(opt.id) ?? false}
                       onCheckedChange={() => handleFilterOnChange(group, opt)}
                       className="text-indigo-600"
                     />
@@ -139,45 +142,100 @@ function StudentCoursePage() {
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col">
-          {/* Sort + Result Count */}
+          {/* Sort + Mobile Filter Button + Result Count */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition"
-                >
-                  <ArrowUpDownIcon className="w-4 h-4" />
-                  <span className="text-sm">Sort By</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuRadioGroup
-                  value={sort}
-                  onValueChange={(value) => setSort(value)}
-                >
-                  {sortOptions.map((so) => (
-                    <DropdownMenuRadioItem value={so.id} key={so.id}>
-                      {so.label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex gap-2">
+              {/* Sort Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition"
+                  >
+                    <ArrowUpDownIcon className="w-4 h-4" />
+                    <span className="text-sm">Sort By</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuRadioGroup
+                    value={sort}
+                    onValueChange={(v) => setSort(v)}
+                  >
+                    {sortOptions.map((so) => (
+                      <DropdownMenuRadioItem value={so.id} key={so.id}>
+                        {so.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Mobile Filters Button */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition md:hidden"
+                  >
+                    <FilterIcon className="w-4 h-4" />
+                    <span className="text-sm">Filters</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-full max-w-xs">
+                  <DialogClose
+                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                    aria-label="Close"
+                  >
+                  </DialogClose>
+                  <div className="pt-6 space-y-6">
+                    {Object.keys(filterOptions).map((group) => (
+                      <div key={group}>
+                        <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                          {group.toUpperCase()}
+                        </h3>
+                        <div className="space-y-2">
+                          {filterOptions[group].map((opt) => (
+                            <Label
+                              htmlFor={`mobile-filter-${group}-${opt.id}`}
+                              className="flex items-center gap-2 text-gray-600"
+                              key={opt.id}
+                            >
+                              <Checkbox
+                                id={`mobile-filter-${group}-${opt.id}`}
+                                checked={
+                                  filters[group]?.includes(opt.id) ?? false
+                                }
+                                onCheckedChange={() =>
+                                  handleFilterOnChange(group, opt)
+                                }
+                                className="text-indigo-600"
+                              />
+                              {opt.label}
+                            </Label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
             <span className="text-sm font-medium text-gray-700">
               {studentCoursesList?.length ?? 0} Results
             </span>
           </div>
 
-          {/* Courses Grid */}
+          {/* Courses Grid / Loading / Empty State */}
           {studentCoursesList && studentCoursesList.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {studentCoursesList.map((course) => (
                 <Card
                   key={course._id}
-                  className="bg-white rounded-lg shadow hover:shadow-md transition"
-                  onClick={() => navigate(`/course/details/${course?._id}`)}
+                  className="bg-white rounded-lg shadow hover:shadow-md transition cursor-pointer"
+                  onClick={() => navigate(`/course/details/${course._id}`)}
                 >
                   <CardContent className="flex flex-col h-full p-4">
                     <div className="w-full h-40 bg-gray-200 rounded overflow-hidden mb-3">
@@ -197,9 +255,9 @@ function StudentCoursePage() {
                       </span>
                     </p>
                     <p className="mt-1 text-sm text-gray-700">
-                      {`${course.curriculum.length} ${
-                        course.curriculum.length === 1 ? "Lecture" : "Lectures"
-                      } • ${course.level.toUpperCase()} Level`}
+                      {course.curriculum.length}{" "}
+                      {course.curriculum.length === 1 ? "Lecture" : "Lectures"}{" "}
+                      • {course.level.toUpperCase()} Level
                     </p>
                     <p className="mt-2 text-sm font-semibold text-indigo-600">
                       ${course.pricing}
@@ -209,7 +267,7 @@ function StudentCoursePage() {
               ))}
             </div>
           ) : loading ? (
-            <Skeleton />
+            <Skeleton className="h-64" />
           ) : (
             <p className="text-center text-gray-500 py-12">No Courses Found</p>
           )}
@@ -218,5 +276,3 @@ function StudentCoursePage() {
     </div>
   );
 }
-
-export default StudentCoursePage;
